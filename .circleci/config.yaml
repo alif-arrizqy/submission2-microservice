@@ -1,0 +1,98 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/configuration-reference
+version: 2.1
+
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/configuration-reference/#jobs
+jobs:
+  # proses jobs lint dockerfile untuk backend
+  lint-backend-dockerfile:
+    docker:
+      - image: cimg/base:stable
+    # steps dari setiap jobs, tidak dikomen karena sudah ada di name
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Installing Hadolint
+          command: "docker pull hadolint/hadolint"
+      - run:
+          name: Linting Backend Dockerfile
+          command: "docker run --rm --interactive hadolint/hadolint < ./karsajobs/Dockerfile"
+  # proses jobs untuk test-app backend
+  test-app:
+    docker:
+      - image: cimg/go:1.15
+    # steps dari setiap jobs, tidak dikomen karena sudah ada di name
+    steps:
+      - checkout
+      - run:
+          name: Testing Go with Go Test
+          command: cd karsajobs && go test -v -short --count=1 $(go list ./...)
+  # build docker file dan push ke dockerhub
+  build-app-karsajobs:
+    docker:
+      - image: cimg/base:stable
+    # steps dari setiap jobs, tidak dikomen karena sudah ada di name
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker Image
+          command: "docker build -t arrizqydev/karsajobs:latest ./karsajobs"
+      - run:
+          name: Login to dockerhub
+          command: echo $PASSWORD_DOCKER_HUB | docker login -u arrizqydev --password-stdin
+      - run:
+          name: Pushing Image to dockerhub
+          command: docker push arrizqydev/karsajobs:latest
+
+  # proses jobs lint dockerfile untuk file frontend
+  lint-frontend-dockerfile:
+    docker:
+      - image: cimg/base:stable
+    # steps dari setiap jobs, tidak dikomen karena sudah ada di name
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Installing Hadolint
+          command: "docker pull hadolint/hadolint"
+      - run:
+          name: "Linting FrontEnd Dockerfile"
+          command: "docker run --rm --interactive hadolint/hadolint < ./karsajobs-ui/Dockerfile"
+
+  # build docker file dan push ke dockerhub
+  build-app-karsajobs-ui:
+    docker:
+      - image: cimg/base:stable
+    # steps dari setiap jobs, tidak dikomen karena sudah ada di name
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker Image
+          command: "docker build -t arrizqydev/karsajobs-ui:latest ./karsajobs-ui/"
+      - run:
+          name: Login to dockerhub
+          command: echo $PASSWORD_DOCKER_HUB | docker login -u arrizqydev --password-stdin
+      - run:
+          name: Pushing Image to dockerhub
+          command: docker push arrizqydev/karsajobs-ui:latest
+
+workflows:
+  karsajobs-backend-workflow:
+    jobs:
+      - lint-backend-dockerfile
+      - test-app:
+          requires: 
+            - lint-backend-dockerfile
+      - build-app-karsajobs:
+          requires: 
+            - test-app
+  karsajobs-frontend-workflow:
+    jobs:
+      - lint-frontend-dockerfile
+      - build-app-karsajobs-ui:
+          requires: 
+            - lint-frontend-dockerfile

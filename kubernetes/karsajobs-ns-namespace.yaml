@@ -1,0 +1,11 @@
+# gunakan api versi 1
+apiVersion: v1
+
+# tentukan jenis object = namespace
+kind: Namespace
+
+# tambahkan metadata
+metadata:
+  name: karsajobs
+  labels:
+    app: karsajobs
