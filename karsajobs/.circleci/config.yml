@@ -1,0 +1,58 @@
+# CircleCI version
+version: 2.1
+
+# Define jobs
+jobs:
+  # proses jobs lint dockerfile untuk backend
+  lint-backend-dockerfile:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Installing Hadolint
+          command: "docker pull hadolint/hadolint"
+      - run:
+          name: Linting Backend Dockerfile
+          command: "docker run --rm --interactive hadolint/hadolint < ./karsajobs/Dockerfile"
+  
+  # proses jobs untuk test-app backend
+  test-app:
+    docker:
+      - image: cimg/go:1.15
+    steps:
+      - checkout
+      - run:
+          name: Testing Go with Go Test
+          command: cd karsajobs && go test -v -short --count=1 $(go list ./...)
+  
+  # build dockerfile dan push ke dockerhub
+  build-app-karsajobs:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker Image
+          command: "docker build -t arrizqydev/karsajobs:latest ./karsajobs"
+      - run:
+          name: Login to dockerhub
+          command: echo $PASSWORD_DOCKER_HUB | docker login -u arrizqydev --password-stdin
+      - run:
+          name: Pushing Image to dockerhub
+          command: docker push arrizqydev/karsajobs:latest
+
+# Define workflows
+workflows:
+  # proses workflow untuk backend
+  karsajobs-workflow:
+    jobs:
+      - lint-backend-dockerfile
+      - test-app:
+          requires: 
+            - lint-backend-dockerfile
+      - build-app-karsajobs:
+          requires: 
+            - test-app

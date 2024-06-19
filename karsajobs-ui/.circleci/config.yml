@@ -1,0 +1,45 @@
+# CircleCI version
+version: 2.1
+
+# Define jobs
+jobs:
+  # proses jobs lint dockerfile untuk file frontend
+  lint-frontend-dockerfile:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Installing Hadolint
+          command: "docker pull hadolint/hadolint"
+      - run:
+          name: "Linting FrontEnd Dockerfile"
+          command: "docker run --rm --interactive hadolint/hadolint < ./karsajobs-ui/Dockerfile"
+
+  # build dockerfile dan push ke dockerhub
+  build-app-karsajobs-ui:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker Image
+          command: "docker build -t arrizqydev/karsajobs-ui:latest ./karsajobs-ui/"
+      - run:
+          name: Login to dockerhub
+          command: echo $PASSWORD_DOCKER_HUB | docker login -u arrizqydev --password-stdin
+      - run:
+          name: Pushing Image to dockerhub
+          command: docker push arrizqydev/karsajobs-ui:latest
+
+# Define workflows
+workflows:
+  # proses workflow untuk frontend
+  karsajobs-ui-workflow:
+    jobs:
+      - lint-frontend-dockerfile
+      - build-app-karsajobs-ui:
+          requires: 
+            - lint-frontend-dockerfile
