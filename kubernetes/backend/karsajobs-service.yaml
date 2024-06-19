@@ -8,5 +8,5 @@ spec:
   ports:
     - port: 8080
   selector:
-    app: mongo
+    app: karsajobs
   type: NodePort
