@@ -15,7 +15,7 @@ jobs:
 
       - name: Lint Dockerfile  # Name of the step
         run: |
-          docker run --rm -i hadolint/hadolint < Dockerfile  # Runs a command to lint a Dockerfile
+          docker run --rm -i hadolint/hadolint < karsajobs/Dockerfile  # Runs a command to lint a Dockerfile
 
   test-app:  # Name of the second job
     runs-on: ubuntu-latest  # Specifies the runner environment
