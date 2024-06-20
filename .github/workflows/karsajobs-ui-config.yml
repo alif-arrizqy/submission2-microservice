@@ -37,5 +37,5 @@ jobs:
 
       - name: Build and push Docker image  # Name of the step
         run: |
-          docker build -t ghcr.io/${{github.actor}}/karsajobs-ui:latest -f karsajobs-ui/Dockerfile . # Builds a Docker image
+          docker build -t ghcr.io/${{github.actor}}/karsajobs-ui:latest . # Builds a Docker image
           docker push ghcr.io/${{github.actor}}/karsajobs-ui:latest  # Pushes the Docker image to GitHub Container Registry
