@@ -3,7 +3,7 @@ name: lint-test-build  # Name of your workflow
 on:
   push:
     branches:
-      - karsajobs  # Workflow is triggered when code is pushed to the "karsajobs" branch
+      - master  # Workflow is triggered when code is pushed to the "master" branch
 
 jobs:
   lint-dockerfile:  # Name of the first job
