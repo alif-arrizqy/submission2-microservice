@@ -1,4 +1,4 @@
-name: karsajobs-ui-workflows  # Name of your workflow
+name: lint-test-build  # Name of your workflow
 
 on:
   push:
